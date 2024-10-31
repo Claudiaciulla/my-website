@@ -1,11 +1,51 @@
 <!DOCTYPE html>
-<html lang="it">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Claudia's site</title>
-    </head>
-    <body>
-    <h1> Il sito di Claudia </h1>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GazeCloud Integration with p5.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://api.gazerecorder.com/GazeCloudAPI.js"></script>
+    <script>
+        let gazeX, gazeY;
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            GazeCloudAPI.StartEyeTracking();
+            
+            GazeCloudAPI.OnResult = function (GazeData) {
+                if (GazeData.state === 0) { // Valid gaze data
+                    gazeX = GazeData.docX;
+                    gazeY = GazeData.docY;
+                }
+            };
+
+            GazeCloudAPI.OnCamDenied = function() {
+                console.log('Camera access denied');
+            };
+
+            GazeCloudAPI.OnError = function(msg) {
+                console.log('Error: ' + msg);
+            };
+        }
+
+        function draw() {
+            background(200);
+            if (gazeX && gazeY) {
+                fill(255, 0, 0);
+                ellipse(gazeX, gazeY, 50, 50); // Draw an ellipse at the gaze coordinates
+            }
+        }
+
+        function mousePressed() {
+            GazeCloudAPI.UseClickRecalibration = true; // Enable recalibration on click
+        }
+
+        window.onbeforeunload = function() {
+            GazeCloudAPI.StopEyeTracking(); // Stop tracking when the window is closed
+        };
+    </script>
+</head>
+<body>
+</body>
 </html>
